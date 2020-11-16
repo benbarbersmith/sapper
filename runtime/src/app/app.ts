@@ -18,9 +18,9 @@ import {
 	Redirect,
 	Branch,
 	Page,
-	PageContext,
 	InitialData
 } from './types';
+import { PageContext } from '@sapper/common';
 import goto from './goto';
 import { page_store } from './stores';
 
@@ -114,11 +114,10 @@ function handle_error() {
 	render([], props, { host, path: pathname, query, params: {}, error });
 }
 
-
 function buildPageContext(props: any, page: Page): PageContext {
-  const { error } = props;
+	const { error } = props;
 
-  return { error, ...page };
+	return { error, ...page };
 }
 
 async function handle_target(dest: Target): Promise<void> {

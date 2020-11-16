@@ -22,8 +22,8 @@ describe('errors', function() {
 		);
 
 		assert.ok(
-			await r.page.$eval(".error-layout", (el) => !!el),
-			"Layout did not get error in page store"
+			await r.page.$eval('.error-layout', (el) => !!el),
+			'Layout did not get error in page store'
 		);
 	}
 
@@ -91,11 +91,27 @@ describe('errors', function() {
 		assert.ok(didLayoutGetError);
 	});
 
+	it('displays a good error messsage when accessing "document" variable on server', async () => {
+		await r.load('/access_document');
+
+		const stack = await r.text('span');
+
+		assert.ok(stack.includes('client only'));
+	});
+
 	it('does not replace server side rendered error', async () => {
 		await r.load('/preload-reject');
 		await r.sapper.start();
 
 		await assertErrorPageRenders(500);
+	});
+
+	it('handles errors occurring in the layout preload', async () => {
+		const res = await r.load('/?layoutthrows=true');
+
+		const responseText = await res.text();
+
+		assert.ok(responseText.includes('Internal server error'), `Expected response "${responseText}" to say "Internal server error"`);
 	});
 
 	it('does not serve error page for explicit non-page errors', async () => {

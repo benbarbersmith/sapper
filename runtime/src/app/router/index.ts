@@ -6,8 +6,8 @@ import {
 	ignore,
 	routes
 } from '@sapper/internal/manifest-client';
-import { Query } from '@sapper/internal/shared';
 import find_anchor from './find_anchor';
+import { Page, Query } from '@sapper/common';
 
 export let uid = 1;
 export function set_uid(n: number) {
@@ -19,11 +19,11 @@ export function set_cid(n: number) {
 	cid = n;
 }
 
-const _history = typeof history !== 'undefined' ? history : {
-	pushState: (state: any, title: string, href: string) => {},
-	replaceState: (state: any, title: string, href: string) => {},
-	scrollRestoration: ''
-};
+const _history: History = typeof history !== 'undefined' ? history : {
+	pushState: () => {},
+	replaceState: () => {},
+	scrollRestoration: 'auto'
+} as Partial<History> as any;
 export { _history as history };
 
 export const scroll_history: Record<string, ScrollPosition> = {};
@@ -68,7 +68,7 @@ export function init(base: string, handler: (dest: Target) => Promise<void>): vo
 }
 
 export function extract_query(search: string) {
-	const query = Object.create(null);
+	const query: Query = Object.create(null);
 	if (search.length > 0) {
 		search.slice(1).split('&').forEach(searchParam => {
 			const [, key, value = ''] = /([^=]*)(?:=(.*))?/.exec(decodeURIComponent(searchParam.replace(/\+/g, ' ')));
@@ -99,11 +99,11 @@ export function select_target(url: URL): Target {
 		const match = route.pattern.exec(path);
 
 		if (match) {
-			const query: Query = extract_query(url.search);
+			const query = extract_query(url.search);
 			const part = route.parts[route.parts.length - 1];
 			const params = part.params ? part.params(match) : {};
 
-			const page = { host: location.host, path, query, params };
+			const page: Page = { host: location.host, path, query, params };
 
 			return { href: url.href, route, match, page };
 		}
@@ -185,7 +185,7 @@ function handle_popstate(event: PopStateEvent) {
 	}
 }
 
-export async function navigate(dest: Target, id: number, noscroll?: boolean, hash?: string): Promise<any> {
+export async function navigate(dest: Target, id: number, noscroll?: boolean, hash?: string): Promise<void> {
 	const popstate = !!id;
 	if (popstate) {
 		cid = id;
